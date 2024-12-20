@@ -1,0 +1,4 @@
+include README.md
+recursive-include error_detection/templates *
+recursive-include error_detection/translations *
+recursive-include error_detection/static *
