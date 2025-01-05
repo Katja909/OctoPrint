@@ -26,6 +26,7 @@ class Error_detectionPlugin(octoprint.plugin.SettingsPlugin,
 
     ##~~ AssetPlugin mixin
 
+    #UI bracuhen wir nicht, delete!
     def get_assets(self):
         # Define your plugin's asset files to automatically include in the
         # core UI here.

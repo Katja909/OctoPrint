@@ -1,0 +1,1 @@
+#Hier listest du alle externen Python-Pakete auf, die dein Plugin benötigt.
