@@ -24,18 +24,6 @@ class Error_detectionPlugin(octoprint.plugin.SettingsPlugin,
             # put your plugin's default settings here
         }
 
-    ##~~ AssetPlugin mixin
-
-    #UI bracuhen wir nicht, delete!
-    def get_assets(self):
-        # Define your plugin's asset files to automatically include in the
-        # core UI here.
-        return {
-            "js": ["js/error_detection.js"],
-            "css": ["css/error_detection.css"],
-            "less": ["less/error_detection.less"]
-        }
-
     ##~~ Softwareupdate hook
 
     def get_update_information(self):
@@ -62,7 +50,7 @@ class Error_detectionPlugin(octoprint.plugin.SettingsPlugin,
 # If you want your plugin to be registered within OctoPrint under a different name than what you defined in setup.py
 # ("OctoPrint-PluginSkeleton"), you may define that here. Same goes for the other metadata derived from setup.py that
 # can be overwritten via __plugin_xyz__ control properties. See the documentation for that.
-__plugin_name__ = "Error_detection Plugin"
+__plugin_name__ = "Error Detection for 3D Printer with AI Model"
 
 
 # Set the Python version your plugin is compatible with below. Recommended is Python 3 only for all new plugins.
