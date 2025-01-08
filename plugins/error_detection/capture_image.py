@@ -7,6 +7,6 @@ from io import BytesIO
 def get_print_image(self):
     """Fetch the current print image from the camera."""
     # Use the appropriate OctoPrint API to get the camera image (assuming you have access to it)
-    response = requests.get("http://<octoprint_host>/api/plugin/camera")  # Replace with actual camera API URL
+    response = requests.get("http://127.0.0.1:8080/?action=snapshot")  # camera API URL
     image = Image.open(BytesIO(response.content))  # Open the image from the response content
     return image
