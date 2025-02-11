@@ -1,0 +1,12 @@
+LICENSE
+setup.py
+OctoPrint_AI_Error_Detector.egg-info/PKG-INFO
+OctoPrint_AI_Error_Detector.egg-info/SOURCES.txt
+OctoPrint_AI_Error_Detector.egg-info/dependency_links.txt
+OctoPrint_AI_Error_Detector.egg-info/entry_points.txt
+OctoPrint_AI_Error_Detector.egg-info/requires.txt
+OctoPrint_AI_Error_Detector.egg-info/top_level.txt
+octoprint_error_detection/__init__.py
+octoprint_error_detection/ai_model.py
+octoprint_error_detection/capture_image.py
+octoprint_error_detection/print.py

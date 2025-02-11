@@ -1,0 +1,26 @@
+Metadata-Version: 2.2
+Name: OctoPrint-AI-Error-Detector
+Version: 0.1.0
+Summary: An OctoPrint plugin for detecting errors during printing with the help of an AI model.
+Home-page: https://github.com/ваш репозиторий
+Author: Ваше Имя
+Author-email: Ваш Email
+License: AGPLv3
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: GNU Affero General Public License v3
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.7,<4
+License-File: LICENSE
+Requires-Dist: octoprint>=1.8.0
+Requires-Dist: Pillow>=8.0.0
+Requires-Dist: opencv-python<5.0.0,>=4.5.0
+Requires-Dist: numpy>=1.21.0
+Requires-Dist: requests>=2.25.0
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: home-page
+Dynamic: license
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
