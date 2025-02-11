@@ -1,7 +1,7 @@
 from setuptools import setup
 
 # The unique identifier for your plugin, used internally by OctoPrint
-PLUGIN_IDENTIFIER = "ai_error_detector"
+PLUGIN_IDENTIFIER = "octoprint_error_detection"
 
 # The name of the Python package for your plugin
 PLUGIN_PACKAGE = "octoprint_error_detection"
