@@ -12,10 +12,15 @@ from __future__ import absolute_import
 
 import octoprint.plugin
 
-class Error_detectionPlugin(octoprint.plugin.SettingsPlugin,
+class Error_detectionPlugin(
+    octoprint.plugin.StartupPlugin,
+    octoprint.plugin.SettingsPlugin,
     octoprint.plugin.AssetPlugin,
     octoprint.plugin.TemplatePlugin
 ):
+
+    def on_after_startup(self):
+        self._logger.info("Hello World!")
 
     ##~~ SettingsPlugin mixin
 
@@ -69,3 +74,5 @@ def __plugin_load__():
     __plugin_hooks__ = {
         "octoprint.plugin.softwareupdate.check_config": __plugin_implementation__.get_update_information
     }
+
+# TODO: https://docs.octoprint.org/en/master/plugins/concepts.html#:~:text=When%20a%20plugin%20gets%20enabled%2C%20OctoPrint%20will%20also%20call%20the%20on_plugin_enabled()%20callback%20on%20its%20implementation%20(if%20it%20exists).%20Likewise%2C%20when%20a%20plugin%20gets%20disabled%20OctoPrint%20will%20call%20the%20on_plugin_disabled()%20callback%20on%20its%20implementation%20(again%2C%20if%20it%20exists).
