@@ -23,6 +23,16 @@ class AIErrorDetectionPlugin(
     # for adding shutting down functionality
     octoprint.plugin.ShutdownPlugin):
 
+    def __plugin_load__(): 
+        global __plugin_implementation__
+        __plugin_implementation__ = AIErrorDetectionPlugin()
+
+        global __plugin_hooks__
+        __plugin_hooks__ = {
+            "octoprint.plugin.softwareupdate.check_config":
+            __plugin_implementation__.get_update_information
+        }
+    
     def on_after_startup(self):
         self._logger.info("Hello World! I am the plugin")
 
@@ -58,9 +68,26 @@ class AIErrorDetectionPlugin(
         return dict(type="tab", 
                     template="plugins\error_detection\octoprint_error_detection\templates\tab_error_detection_dashboard.jinja2")
     
+    # from Katya's init
     def get_update_information(self):
-        # Return None or an empty dictionary to disable update checks
-        return {}
+        # Define the configuration for your plugin to use with the Software Update
+        # Plugin here. See https://docs.octoprint.org/en/master/bundledplugins/softwareupdate.html
+        # for details.
+        return {
+            "error_detection": {
+                "displayName": "Error_detection Plugin",
+                "displayVersion": self._plugin_version,
+
+                # version check: github repository
+                "type": "github_release",
+                "user": "Katja909",
+                "repo": "error_detection_with_AI",
+                "current": self._plugin_version,
+
+                # update method: pip
+                "pip": "https://github.com/Katja909/error_detection_with_AI/archive/{target_version}.zip",
+            }
+        }
     
     """Check if the monitoring process started"""
     def check_monitoring(self):
@@ -71,16 +98,6 @@ class AIErrorDetectionPlugin(
             self._monitoring - True
             threading.Thread(target=self.monitor_print, daemon=True).start()
             self._logger.info("Monitoring started")
-
-    def __plugin_load__(): 
-        global __plugin_implementation__
-        __plugin_implementation__ = AIErrorDetectionPlugin()
-
-        global __plugin_hooks__
-        __plugin_hooks__ = {
-            "octoprint.plugin.softwareupdate.check_config":
-            __plugin_implementation__.get_update_information
-        }
     
 
     def monitor_print(self):
@@ -110,3 +127,4 @@ __plugin_name__ = "Error Detection for 3D Printer with AI Model"
 __plugin_version__ = "0.1.1"
 __plugin_description__ = "An OctoPrint plugin for detecting errors during printing with help of an AI Model"
 __plugin_implementation__ = AIErrorDetectionPlugin()
+__plugin_pythoncompat__ = ">=3,<4"  # Only Python 3
