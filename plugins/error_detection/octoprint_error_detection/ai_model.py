@@ -1,14 +1,14 @@
-# from yolov11 import YOLOv11
+from yolov11 import YOLOv11
 from PIL import Image
-from ultralytics import YOLO
+# from ultralytics import YOLO
 import logging
 
 class ai_model:
     def __init__(self, model_path):
         """Initializes the model with the provided path."""
         try:
-            self.model = YOLO(model_path)  # Load the YOLO model
-            # self.model = YOLOv11(model_path)
+            # self.model = YOLO(model_path)  # Load the YOLO model
+            self.model = YOLOv11(model_path)
         except Exception as e:
             print(f"Failed to initialize YOLO model: {e}")
             self.model = None
