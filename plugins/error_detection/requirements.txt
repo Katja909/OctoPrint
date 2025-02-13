@@ -1,5 +1,6 @@
-#Hier listest du alle externen Python-Pakete auf, die dein Plugin benötigt.octoprint>=1.8.0
+octoprint>=1.8.0
 Pillow>=8.0.0
 opencv-python<5.0.0,>=4.5.0
 numpy>=1.21.0
 requests>=2.25.0
+ultralytics>=8.0.0

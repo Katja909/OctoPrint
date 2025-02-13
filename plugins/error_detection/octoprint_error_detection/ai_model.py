@@ -8,6 +8,7 @@ class ai_model:
         """Initializes the model with the provided path."""
         try:
             self.model = YOLO(model_path)  # Load the YOLO model
+            # self.model = YOLOv11(model_path)
         except Exception as e:
             print(f"Failed to initialize YOLO model: {e}")
             self.model = None
