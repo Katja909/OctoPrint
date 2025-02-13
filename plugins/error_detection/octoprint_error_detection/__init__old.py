@@ -11,6 +11,7 @@ from __future__ import absolute_import
 # Take a look at the documentation on what other plugin mixins are available.
 
 import octoprint.plugin
+import plugins.error_detection.octoprint_error_detection.print as plugin
 
 class Error_detectionPlugin(
     octoprint.plugin.StartupPlugin,
@@ -31,6 +32,7 @@ class Error_detectionPlugin(
 
     ##~~ Softwareupdate hook
 
+    # not necessary, delete
     def get_update_information(self):
         # Define the configuration for your plugin to use with the Software Update
         # Plugin here. See https://docs.octoprint.org/en/master/bundledplugins/softwareupdate.html
@@ -57,8 +59,9 @@ class Error_detectionPlugin(
 # can be overwritten via __plugin_xyz__ control properties. See the documentation for that.
 
 __plugin_name__ = "Error Detection for 3D Printer with AI Model"
-__plugin_version__ = "0.1.0"
+__plugin_version__ = "0.1.1"
 __plugin_description__ = "An OctoPrint plugin for detecting errors during printing with help of an AI Model"
+# __plugin_implementation__ = plugin.MyPlugin()
 
 
 # Set the Python version your plugin is compatible with below. Recommended is Python 3 only for all new plugins.

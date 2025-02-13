@@ -1,12 +1,16 @@
 # from yolov11 import YOLOv11
 from PIL import Image
 from ultralytics import YOLO
+import logging
 
 class ai_model:
     def __init__(self, model_path):
         """Initializes the model with the provided path."""
-        self.model_path = model_path
-        self.model = YOLO(model_path)  # Load the YOLOv11 model
+        try:
+            self.model = YOLO(model_path)  # Load the YOLO model
+        except Exception as e:
+            print(f"Failed to initialize YOLO model: {e}")
+            self.model = None
 
     def detect_error(self, image):
         """
@@ -15,6 +19,9 @@ class ai_model:
         :param image: The input image to analyze.
         :return: True if confidence > 30, False otherwise.
         """
+        if not self.model:
+            print("Model not initialized.")
+            return False
         try:
             # Run inference on the image
             results = self.model.predict(image)
