@@ -1,11 +1,12 @@
-from yolov11 import YOLOv11
+# from yolov11 import YOLOv11
 from PIL import Image
+from ultralytics import YOLO
 
 class ai_model:
     def __init__(self, model_path):
         """Initializes the model with the provided path."""
         self.model_path = model_path
-        self.model = YOLOv11(model_path)  # Load the YOLOv11 model
+        self.model = YOLO(model_path)  # Load the YOLOv11 model
 
     def detect_error(self, image):
         """
