@@ -35,6 +35,7 @@ PLUGIN_REQUIREMENTS = [
     "threading",
     "Pillow",
     "opencv-python",
+    "ultralytics",
     "numpy",
     "requests"
 ]
