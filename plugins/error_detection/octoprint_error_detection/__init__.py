@@ -23,35 +23,23 @@ class AIErrorDetectionPlugin(
     # for adding shutting down functionality
     octoprint.plugin.ShutdownPlugin):
 
-    def __plugin_load__(): 
-        global __plugin_implementation__
-        __plugin_implementation__ = AIErrorDetectionPlugin()
-
-        global __plugin_hooks__
-        __plugin_hooks__ = {
-            "octoprint.plugin.softwareupdate.check_config":
-            __plugin_implementation__.get_update_information
-        }
-    
-    def on_after_startup(self):
-        self._logger.info("Hello World! I am the plugin")
-
     def initialize(self):
-        # initialize model
-        model_path = "model_weights\train_100_epochs\best.pt"
-        self.error_model = ai_model(model_path)  # Error detection model
-        self._monitoring = False  # Monitoring status
-            # self._logger.info("Plugin initialized.")
-
-        # Configure the logger
-        self._logger = self._logger
-        handler = logging.StreamHandler()
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        handler.setFormatter(formatter)
-        self._logger.addHandler(handler)
         self._logger.setLevel(logging.INFO)
+        self._logger.info("AI Error Detection Plugin initialized.")
 
-        self._logger.info("Plugin initialized.")
+        # Load the AI model
+        model_path = "model_weights/train_100_epochs/best.pt"
+        try:
+            self.error_model = ai_model(model_path)
+            self._logger.info("Model loaded successfully.")
+        except Exception as e:
+            self._logger.error(f"Failed to load AI model: {e}")
+            self.error_model = None
+
+        self._monitoring = False
+
+    def on_after_startup(self):
+        self._logger.info("Hello World! I initialized correctly")
 
     # retrieve the UI functionality    
     def get_assets(self):
@@ -122,6 +110,7 @@ class AIErrorDetectionPlugin(
         """Sends a notification to the user."""
         # TODO: send_plugin_message method may not be initialized
         self._plugin_manager.send_plugin_message(self._identifier, dict(type="error", message=message))
+        self._logger.error(message)
 
 __plugin_name__ = "Error Detection for 3D Printer with AI Model"
 __plugin_version__ = "0.1.1"
