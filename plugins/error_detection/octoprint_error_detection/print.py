@@ -2,10 +2,12 @@ import octoprint.plugin
 import time
 import threading
 import logging
-import octoprint_error_detection.ai_model as ai_model  
+import octoprint_error_detection.ai_model as ai_model
+import plugins.error_detection.octoprint_error_detection.capture_image as capture_image
 
 class MyPlugin(octoprint.plugin.OctoPrintPlugin):
     def initialize(self):
+        # initialize model
         model_path = "model_weights\train_100_epochs\best.pt"
         self.error_model = ai_model(model_path)  # Error detection model
         self._monitoring = False  # Monitoring status
@@ -41,7 +43,8 @@ class MyPlugin(octoprint.plugin.OctoPrintPlugin):
         while self._monitoring:
             try:
                 # Example: Get the image from the printer camera (use your method to capture the print image)
-                image = self.get_print_image()
+                # image = self.get_print_image()
+                image = capture_image.get_print_image()
 
                 # Detect error in the captured image
                 if self.error_model.detect_error(image):
@@ -55,4 +58,5 @@ class MyPlugin(octoprint.plugin.OctoPrintPlugin):
 
     def notify_user(self, message):
         """Sends a notification to the user."""
+        # TODO: send_plugin_message method may not be initialized
         self._plugin_manager.send_plugin_message(self._identifier, dict(type="error", message=message))
