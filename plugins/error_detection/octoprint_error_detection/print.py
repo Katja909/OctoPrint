@@ -2,7 +2,7 @@ import octoprint.plugin
 import time
 import threading
 import logging
-import octoprint_error_detection.ai_model as ai_model
+from .ai_model import ai_model
 import octoprint_error_detection.capture_image as capture_image
 
 class MyPlugin(octoprint.plugin.OctoPrintPlugin):
