@@ -10,7 +10,7 @@ PLUGIN_PACKAGE = "octoprint_error_detection"
 PLUGIN_NAME = "OctoPrint-AI Error Detector"
 
 # The version of your plugin
-PLUGIN_VERSION = "0.1.0"
+PLUGIN_VERSION = "0.1.2"
 
 # A brief description of your plugin
 PLUGIN_DESCRIPTION = "An OctoPrint plugin for detecting errors during printing with help of an AI Model"
@@ -30,7 +30,7 @@ PLUGIN_LICENSE = "AGPLv3"
 # The Python packages required for your plugin to work
 PLUGIN_REQUIREMENTS = [
     "octoprint" ,
-    "yolov11",  # YOLOv11 wrapper, if required
+    "yolov5",  # YOLOv5 wrapper, if required
     "time",
     "threading",
     "Pillow",
