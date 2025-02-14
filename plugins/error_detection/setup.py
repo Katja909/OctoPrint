@@ -29,14 +29,12 @@ PLUGIN_LICENSE = "AGPLv3"
 
 # The Python packages required for your plugin to work
 PLUGIN_REQUIREMENTS = [
-    "octoprint" ,
-    "yolov5",  # YOLOv5 wrapper, if required
-    "time",
-    "threading",
+    "octoprint",
     "Pillow",
-    "opencv-python",
+    "opencv-python-headless",
     "numpy",
-    "requests"
+    "requests",
+    "tflite-runtime"
 ]
 
 # Plugin setup configuration

@@ -8,7 +8,7 @@ import plugins.error_detection.octoprint_error_detection.capture_image as captur
 class MyPlugin(octoprint.plugin.OctoPrintPlugin):
     def initialize(self):
         # initialize model
-        model_path = "plugins\error_detection\octoprint_error_detection\model_weights\train_100_epochs\best-fp16.tflite"
+        model_path = r"plugins\error_detection\octoprint_error_detection\model_weights\train_100_epochs\best-fp16.tflite"
         self.error_model = ai_model(model_path)  # Error detection model
         self._monitoring = False  # Monitoring status
             # self._logger.info("Plugin initialized.")
@@ -33,7 +33,7 @@ class MyPlugin(octoprint.plugin.OctoPrintPlugin):
             self._monitoring = False
             self._logger.info("Monitoring stopped")
         else:
-            self._monitoring - True
+            self._monitoring = True
             threading.Thread(target=self.monitor_print, daemon=True).start()
             self._logger.info("Monitoring started")
     
