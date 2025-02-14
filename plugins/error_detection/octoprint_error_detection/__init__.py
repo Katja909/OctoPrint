@@ -1,7 +1,7 @@
 # coding=utf-8
 from __future__ import absolute_import
 #from <ai_file> import <name_of_trained_ai_model>
-import plugins.error_detection.octoprint_error_detection.print as print
+from plugins.error_detection.octoprint_error_detection.print import MyPlugin
 
 ### (Don't forget to remove me)
 # This is a basic skeleton for your plugin's __init__.py. You probably want to adjust the class name of your plugin
@@ -64,7 +64,7 @@ __plugin_pythoncompat__ = ">=3,<4"  # Only Python 3
 
 def __plugin_load__():
     global __plugin_implementation__
-    __plugin_implementation__ = print.MyPlugin()
+    __plugin_implementation__ = MyPlugin()
 
     global __plugin_hooks__
     __plugin_hooks__ = {
