@@ -8,7 +8,7 @@ import plugins.error_detection.octoprint_error_detection.capture_image as captur
 class MyPlugin(octoprint.plugin.OctoPrintPlugin):
     def initialize(self):
         # initialize model
-        model_path = "model_weights\train_100_epochs\best.pt"
+        model_path = "plugins\error_detection\octoprint_error_detection\model_weights\train_100_epochs\best-fp16.tflite"
         self.error_model = ai_model(model_path)  # Error detection model
         self._monitoring = False  # Monitoring status
             # self._logger.info("Plugin initialized.")
