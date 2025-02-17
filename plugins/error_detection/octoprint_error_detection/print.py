@@ -71,7 +71,7 @@ class MyPlugin(octoprint.plugin.SimpleApiPlugin,
                 if image is not None:
                     # Use the AI model to detect an error in the captured image
                     if self.error_model.detect_error(image):
-                        self._logger.warning("Error detected at Z=%.2f!", current_z)
+                        # self._logger.warning("Error detected at Z=%.2f!", current_z)
                         self.notify_user("Error detected in the print process!")
                         self._printer.cancel_print()
                         self._monitoring = False
