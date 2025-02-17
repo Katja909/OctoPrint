@@ -50,12 +50,12 @@ class MyPlugin(octoprint.plugin.SimpleApiPlugin,
         and stop when it finishes or is canceled.
         """
         if event == "PrintStarted":
-            self._logger.info("Print started, starting monitoring loop.")
+            self._logger.info("Print started, error detection monitors printing.")
             self._monitoring = True
             self.last_z = None  # Reset the baseline for the Z position
             threading.Thread(target=self.monitor_print, daemon=True).start()
         elif event in ("PrintDone", "PrintCancelled", "PrintFailed"):
-            self._logger.info("Print ended (%s), stopping monitoring loop.", event)
+            self._logger.info("Print ended (%s), error detection stopped monitoring.", event)
             self._monitoring = False
 
     def monitor_print(self):
@@ -66,40 +66,22 @@ class MyPlugin(octoprint.plugin.SimpleApiPlugin,
         """
         while self._monitoring:
             try:
-                # Retrieve current printer data
-                data = self._printer.get_current_data()
-                # Access the current Z position (adjust based on your printer's data structure)
-                current_z = data.get("printer", {}).get("position", {}).get("z", None)
-                if current_z is None:
-                    self._logger.info("No Z position data available.")
-                    time.sleep(1)
-                    continue
-
-                # Set the baseline if not already set
-                if self.last_z is None:
-                    self.last_z = current_z
-
-                # If the head has moved at least 1mm since the last capture:
-                if current_z - self.last_z >= 1:
-                    self.last_z = current_z
-                    self._logger.info("Z position increased to %.2f. Capturing image...", current_z)
-
-                    # Capture an image from the printer's camera
-                    image = capture_image.get_print_image(self)
-                    if image is not None:
-                        # Use the AI model to detect an error in the captured image
-                        if self.error_model.detect_error(image):
-                            self._logger.warning("Error detected at Z=%.2f!", current_z)
-                            self.notify_user("Error detected in the print process!")
-                            self._printer.cancel_print()
-                            self._monitoring = False
-                            break
-                    else:
-                        self._logger.warning("Failed to capture image.")
+                # Capture an image from the printer's camera
+                image = capture_image.get_print_image(self)
+                if image is not None:
+                    # Use the AI model to detect an error in the captured image
+                    if self.error_model.detect_error(image):
+                        self._logger.warning("Error detected at Z=%.2f!", current_z)
+                        self.notify_user("Error detected in the print process!")
+                        self._printer.cancel_print()
+                        self._monitoring = False
+                        break
+                else:
+                    self._logger.warning("Failed to capture image.")
             except Exception as e:
                 self._logger.error("Error during monitoring: %s", e)
 
-            time.sleep(0.5)  # Adjust the polling frequency as needed
+            time.sleep(0.5)
 
     def notify_user(self, message):
         """
