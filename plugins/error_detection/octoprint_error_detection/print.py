@@ -5,8 +5,8 @@ import logging
 from .ai_model import ai_model
 import octoprint_error_detection.capture_image as capture_image
 
-class MyPlugin(octoprint.plugin.OctoPrintPlugin,
-               octoprint.plugin.SimpleApiPlugin):
+class MyPlugin(octoprint.plugin.SimpleApiPlugin,
+               octoprint.plugin.OctoPrintPlugin):
     def initialize(self):
         # initialize model
         model_path = r"plugins\error_detection\octoprint_error_detection\model_weights\train_100_epochs\best-fp16.tflite"
