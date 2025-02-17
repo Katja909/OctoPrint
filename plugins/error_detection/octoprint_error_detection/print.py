@@ -40,40 +40,57 @@ class MyPlugin(octoprint.plugin.SimpleApiPlugin,
             self._logger.info("Manual trigger of monitoring loop received.")
             # Start the monitoring loop in a separate thread
             threading.Thread(target=self.monitor_print, daemon=True).start()
-            return dict(status="monitoring started")
+            return dict(status="DEBUG: manually invoked monitoring method started")
 
     # --- End of API Plugin Implementation ---
     
-    """Check if the monitoring process started"""
-    def check_monitoring(self):
-        if self._monitoring:
-            self._monitoring = False
-            self._logger.info("Monitoring stopped")
-        else:
-            self._monitoring = True
-            threading.Thread(target=self.monitor_print, daemon=True).start()
-            self._logger.info("Monitoring started")
+    # """Check if the monitoring process started"""
+    # def check_monitoring(self):
+    #     # the monitoring parameter may be a dummy
+    #     if self._monitoring:
+    #         self._monitoring = False
+    #         self._logger.info("Monitoring stopped")
+    #     else:
+    #         self._monitoring = True
+    #         threading.Thread(target=self.monitor_print, daemon=True).start()
+    #         self._logger.info("Monitoring started")
     
+
+    # def monitor_print(self):
+    #     """Continuously monitors the print process for errors."""
+    #     while self._monitoring:
+    #         try:
+    #             # Example: Get the image from the printer camera (use your method to capture the print image)
+    #             # image = self.get_print_image()
+    #             image = capture_image.get_print_image()
+
+    #             # Detect error in the captured image
+    #             if self.error_model.detect_error(image):
+    #                 self._logger.warning("Error detected in the print process!")
+    #                 self.notify_user("Error detected!")
+    #                 self._monitoring = False  # Stop monitoring
+    #                 self._printer.cancel_print()  # Cancel the print
+    #         except Exception as e:
+    #             self._logger.error(f"Error in monitoring process: {e}")
+    #         time.sleep(1)  # Adjustable monitoring frequency
 
     def monitor_print(self):
         """Continuously monitors the print process for errors."""
-        while self._monitoring:
+        while self._printer.get_state_string() == "Printing":
             try:
-                # Example: Get the image from the printer camera (use your method to capture the print image)
-                # image = self.get_print_image()
-                image = capture_image.get_print_image()
-
-                # Detect error in the captured image
-                if self.error_model.detect_error(image):
-                    self._logger.warning("Error detected in the print process!")
-                    self.notify_user("Error detected!")
-                    self._monitoring = False  # Stop monitoring
-                    self._printer.cancel_print()  # Cancel the print
+                # image = capture_image.get_print_image()
+                # if self.error_model.detect_error(image):
+                #     self._logger.warning("Error detected in the print process!")
+                #     self.notify_user("Error detected!")
+                #     self._printer.cancel_print()  # Cancel the print if needed
+                #     break
+                self._logger.info("the interface with printer is working, I am able to retrieve the state")
             except Exception as e:
-                self._logger.error(f"Error in monitoring process: {e}")
+                self._logger.error("Error in monitoring process: %s", e)
             time.sleep(1)  # Adjustable monitoring frequency
 
     def notify_user(self, message):
         """Sends a notification to the user."""
         # TODO: send_plugin_message method may not be initialized
-        self._plugin_manager.send_plugin_message(self._identifier, dict(type="error", message=message))
+        # self._plugin_manager.send_plugin_message(self._identifier, dict(type="error", message=message))
+        self._logger.error(message)
