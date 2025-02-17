@@ -4,6 +4,8 @@ import threading
 import logging
 from .ai_model import ai_model
 import octoprint_error_detection.capture_image as capture_image
+# the library to interact with the printer
+import octoprint.printer
 
 class MyPlugin(octoprint.plugin.SimpleApiPlugin,
                octoprint.plugin.OctoPrintPlugin):
@@ -76,6 +78,8 @@ class MyPlugin(octoprint.plugin.SimpleApiPlugin,
 
     def monitor_print(self):
         """Continuously monitors the print process for errors."""
+        # insert the functionality of comm.py here 
+        self._logger.info(f"Custom state now is:{self._printer.get_state_string()}")
         while self._printer.get_state_string() == "Printing":
             try:
                 # image = capture_image.get_print_image()
