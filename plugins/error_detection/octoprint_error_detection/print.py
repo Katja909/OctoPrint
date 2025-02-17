@@ -5,7 +5,8 @@ import logging
 from .ai_model import ai_model
 import octoprint_error_detection.capture_image as capture_image
 
-class MyPlugin(octoprint.plugin.OctoPrintPlugin):
+class MyPlugin(octoprint.plugin.OctoPrintPlugin,
+               octoprint.plugin.SimpleApiPlugin):
     def initialize(self):
         # initialize model
         model_path = r"plugins\error_detection\octoprint_error_detection\model_weights\train_100_epochs\best-fp16.tflite"
@@ -26,6 +27,22 @@ class MyPlugin(octoprint.plugin.OctoPrintPlugin):
     def get_update_information(self):
         # Return None or an empty dictionary to disable update checks
         return None
+    
+        # --- Simple API Plugin Implementation ---
+    def get_api_commands(self):
+        # Define a new command "trigger_monitor" to manually start the monitoring loop.
+        return dict(
+            trigger_monitor=[]
+        )
+
+    def on_api_command(self, command, data):
+        if command == "trigger_monitor":
+            self._logger.info("Manual trigger of monitoring loop received.")
+            # Start the monitoring loop in a separate thread
+            threading.Thread(target=self.monitor_print, daemon=True).start()
+            return dict(status="monitoring started")
+
+    # --- End of API Plugin Implementation ---
     
     """Check if the monitoring process started"""
     def check_monitoring(self):
