@@ -1,100 +1,109 @@
+# print.py
 import octoprint.plugin
-import time
 import threading
+import time
 import logging
+
 from .ai_model import ai_model
 import octoprint_error_detection.capture_image as capture_image
-# the library to interact with the printer
-import octoprint.printer
+
 
 class MyPlugin(octoprint.plugin.SimpleApiPlugin,
+               octoprint.plugin.EventHandlerPlugin,
                octoprint.plugin.OctoPrintPlugin):
-    def initialize(self):
-        # initialize model
-        model_path = r"plugins\error_detection\octoprint_error_detection\model_weights\train_100_epochs\best-fp16.tflite"
-        self.error_model = ai_model(model_path)  # Error detection model
-        self._monitoring = False  # Monitoring status
-            # self._logger.info("Plugin initialized.")
 
-        # Configure the logger
-        self._logger = self._logger
+    def initialize(self):
+        # Path to the TFLite model
+        model_path = r"plugins/error_detection/octoprint_error_detection/model_weights/train_100_epochs/best-fp16.tflite"
+        self.error_model = ai_model(model_path)  # Initialize the AI error detection model
+
+        self._monitoring = False
+        self.last_z = None  # Used to track the Z position for 1mm intervals
+
+        # Configure logging to display in octoprint.log
+        self._logger.setLevel(logging.INFO)
         handler = logging.StreamHandler()
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         handler.setFormatter(formatter)
         self._logger.addHandler(handler)
-        self._logger.setLevel(logging.INFO)
+        self._logger.info("AI Error Detection plugin initialized.")
 
-        self._logger.info("Plugin initialized.")
-        
     def get_update_information(self):
-        # Return None or an empty dictionary to disable update checks
+        # Disable update checks for now
         return None
-    
-        # --- Simple API Plugin Implementation ---
+
     def get_api_commands(self):
-        # Define a new command "trigger_monitor" to manually start the monitoring loop.
-        return dict(
-            trigger_monitor=[]
-        )
+        # Expose an API command for a manual trigger
+        return dict(trigger_monitor=[])
 
     def on_api_command(self, command, data):
         if command == "trigger_monitor":
             self._logger.info("Manual trigger of monitoring loop received.")
-            # Start the monitoring loop in a separate thread
+            if not self._monitoring:
+                self._monitoring = True
+                threading.Thread(target=self.monitor_print, daemon=True).start()
+            return dict(status="DEBUG: monitoring started")
+
+    def on_event(self, event, payload):
+        """
+        Listen to print events so that we start monitoring when a print starts
+        and stop when it finishes or is canceled.
+        """
+        if event == "PrintStarted":
+            self._logger.info("Print started, starting monitoring loop.")
+            self._monitoring = True
+            self.last_z = None  # Reset the baseline for the Z position
             threading.Thread(target=self.monitor_print, daemon=True).start()
-            return dict(status="DEBUG: manually invoked monitoring method started")
-
-    # --- End of API Plugin Implementation ---
-    
-    # """Check if the monitoring process started"""
-    # def check_monitoring(self):
-    #     # the monitoring parameter may be a dummy
-    #     if self._monitoring:
-    #         self._monitoring = False
-    #         self._logger.info("Monitoring stopped")
-    #     else:
-    #         self._monitoring = True
-    #         threading.Thread(target=self.monitor_print, daemon=True).start()
-    #         self._logger.info("Monitoring started")
-    
-
-    # def monitor_print(self):
-    #     """Continuously monitors the print process for errors."""
-    #     while self._monitoring:
-    #         try:
-    #             # Example: Get the image from the printer camera (use your method to capture the print image)
-    #             # image = self.get_print_image()
-    #             image = capture_image.get_print_image()
-
-    #             # Detect error in the captured image
-    #             if self.error_model.detect_error(image):
-    #                 self._logger.warning("Error detected in the print process!")
-    #                 self.notify_user("Error detected!")
-    #                 self._monitoring = False  # Stop monitoring
-    #                 self._printer.cancel_print()  # Cancel the print
-    #         except Exception as e:
-    #             self._logger.error(f"Error in monitoring process: {e}")
-    #         time.sleep(1)  # Adjustable monitoring frequency
+        elif event in ("PrintDone", "PrintCancelled", "PrintFailed"):
+            self._logger.info("Print ended (%s), stopping monitoring loop.", event)
+            self._monitoring = False
 
     def monitor_print(self):
-        """Continuously monitors the print process for errors."""
-        # insert the functionality of comm.py here 
-        self._logger.info(f"Custom state now is:{self._printer.get_state_string()}")
-        while self._printer.get_state_string() == "Printing":
+        """
+        Continuously monitor the print process by checking the printer's Z position.
+        Every time the head moves 1mm or more, capture an image and run error detection.
+        If an error is detected, log the message, notify the user, and cancel the print.
+        """
+        while self._monitoring:
             try:
-                # image = capture_image.get_print_image()
-                # if self.error_model.detect_error(image):
-                #     self._logger.warning("Error detected in the print process!")
-                #     self.notify_user("Error detected!")
-                #     self._printer.cancel_print()  # Cancel the print if needed
-                #     break
-                self._logger.info("the interface with printer is working, I am able to retrieve the state")
+                # Retrieve current printer data
+                data = self._printer.get_current_data()
+                # Access the current Z position (adjust based on your printer's data structure)
+                current_z = data.get("printer", {}).get("position", {}).get("z", None)
+                if current_z is None:
+                    self._logger.info("No Z position data available.")
+                    time.sleep(1)
+                    continue
+
+                # Set the baseline if not already set
+                if self.last_z is None:
+                    self.last_z = current_z
+
+                # If the head has moved at least 1mm since the last capture:
+                if current_z - self.last_z >= 1:
+                    self.last_z = current_z
+                    self._logger.info("Z position increased to %.2f. Capturing image...", current_z)
+
+                    # Capture an image from the printer's camera
+                    image = capture_image.get_print_image(self)
+                    if image is not None:
+                        # Use the AI model to detect an error in the captured image
+                        if self.error_model.detect_error(image):
+                            self._logger.warning("Error detected at Z=%.2f!", current_z)
+                            self.notify_user("Error detected in the print process!")
+                            self._printer.cancel_print()
+                            self._monitoring = False
+                            break
+                    else:
+                        self._logger.warning("Failed to capture image.")
             except Exception as e:
-                self._logger.error("Error in monitoring process: %s", e)
-            time.sleep(1)  # Adjustable monitoring frequency
+                self._logger.error("Error during monitoring: %s", e)
+
+            time.sleep(0.5)  # Adjust the polling frequency as needed
 
     def notify_user(self, message):
-        """Sends a notification to the user."""
-        # TODO: send_plugin_message method may not be initialized
-        # self._plugin_manager.send_plugin_message(self._identifier, dict(type="error", message=message))
+        """
+        Send a notification to the user.
+        Currently, this simply logs the error to octoprint.log.
+        """
         self._logger.error(message)
