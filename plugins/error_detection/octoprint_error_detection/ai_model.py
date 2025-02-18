@@ -1,6 +1,9 @@
 import numpy as np
 import cv2
 import tflite_runtime.interpreter as tflite
+import logging
+
+logger = logging.getLogger("octoprint.plugins.ai_error_detection")
 
 class ai_model:
     def __init__(self, model_path):
@@ -13,7 +16,7 @@ class ai_model:
             self.input_details = self.interpreter.get_input_details()
             self.output_details = self.interpreter.get_output_details()
         except Exception as e:
-            print(f"Failed to initialize TFLite model: {e}")
+            logger.error(f"Failed to initialize TFLite model: {e}")
             self.interpreter = None
 
     def preprocess_image(self, image_input):
@@ -48,7 +51,7 @@ class ai_model:
         Adjust postprocessing to match your TFLite model's output.
         """
         if not self.interpreter:
-            print("Model not initialized.")
+            logger.error("Model not initialized.")
             return False
         try:
             # Preprocess the image (whether file path or array)
@@ -69,5 +72,5 @@ class ai_model:
                     return True
             return False
         except Exception as e:
-            print(f"Error during error detection: {e}")
+            logger.error(f"Error during error detection: {e}")
             return False
