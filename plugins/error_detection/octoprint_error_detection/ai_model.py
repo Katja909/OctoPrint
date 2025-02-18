@@ -15,6 +15,7 @@ class ai_model:
             # Get input and output details
             self.input_details = self.interpreter.get_input_details()
             self.output_details = self.interpreter.get_output_details()
+            logger.info(f"Initialized TFLite model with input shape: {self.input_details[0]['shape']}")
         except Exception as e:
             logger.error(f"Failed to initialize TFLite model: {e}")
             self.interpreter = None
@@ -29,7 +30,7 @@ class ai_model:
         if isinstance(image_input, str):
             img = cv2.imread(image_input)
             if img is None:
-                raise ValueError("Image not found or unable to load.")
+                raise ValueError("AI Model: Image not found or unable to load.")
         else:
             # Assume the image is already loaded as a NumPy array
             img = image_input
@@ -43,6 +44,7 @@ class ai_model:
         img_transposed = np.transpose(img_normalized, (2, 0, 1))
         # Add a batch dimension
         input_tensor = np.expand_dims(img_transposed, axis=0)
+        logger.info(f"AI Model: Image preprocessed for inference.")
         return input_tensor
 
     def detect_error(self, image_input):
@@ -51,7 +53,7 @@ class ai_model:
         Adjust postprocessing to match your TFLite model's output.
         """
         if not self.interpreter:
-            logger.error("Model not initialized.")
+            logger.error("AI Model not initialized, interpretr is not configured.")
             return False
         try:
             # Preprocess the image (whether file path or array)
@@ -66,9 +68,11 @@ class ai_model:
             # Example postprocessing: assume outputs shape is [1, num_detections, 6]
             # where each detection is [x1, y1, x2, y2, confidence, class]
             detections = outputs  # Adjust if your model returns multiple outputs
+            logger.info(f"Model output generated.")
             for detection in detections[0]:
                 confidence = detection[4]
                 if confidence * 100 > 30:
+                    logger.info(f"Detected error with confidence: {confidence * 100:.2f}%")
                     return True
             return False
         except Exception as e:
