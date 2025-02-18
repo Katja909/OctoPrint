@@ -1,3 +1,4 @@
+# print.py
 import octoprint.plugin
 import threading
 import time
@@ -13,8 +14,10 @@ class MyPlugin(octoprint.plugin.SimpleApiPlugin,
                octoprint.plugin.OctoPrintPlugin):
 
     def initialize(self):
-        # Path to the TFLite model
-        model_path = r"plugins/error_detection/octoprint_error_detection/model_weights/train_100_epochs/best-fp16.tflite"
+        # Compute the absolute path to the TFLite model based on this file's location.
+        self_dir = os.path.dirname(__file__)
+        model_path = os.path.join(self_dir, "model_weights", "train_100_epochs", "best-fp16.tflite")
+        self._logger.info(f"Using TFLite model at: {model_path}")
         self.error_model = ai_model(model_path)  # Initialize the AI error detection model
 
         self._monitoring = False
