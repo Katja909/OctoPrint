@@ -23,7 +23,7 @@ def get_print_image(self):
 
         # List all files in the directory
         files = os.listdir(octolapse_path)
-        logger.info(f"Fetching print images... Files in octolapse directory: {files}")
+        # logger.info(f"Fetching print images... Files in octolapse directory: {files}")
 
         if not files:
             logger.warning("No image files found in the octolapse directory. Did you enable Octolapse?")
@@ -44,7 +44,7 @@ def get_print_image(self):
 
         # Get the latest image file
         latest_image_path = os.path.join(octolapse_path, image_files[0])
-        logger.info(f"Latest image selected: {latest_image_path}")
+        # logger.info(f"Latest image selected: {latest_image_path}")
 
         # Read the image using OpenCV
         image = cv2.imread(latest_image_path)
