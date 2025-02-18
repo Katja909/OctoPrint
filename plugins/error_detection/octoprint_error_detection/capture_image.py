@@ -1,16 +1,18 @@
+# capture_image.py
 import os
 import cv2
 import logging
 
 # Configure the error detection logger for OctoPrint
-logger = logging.getLogger("octoprint.plugins.ai_error_detection")  # Plugin-specific logger
+logger = logging.getLogger("octoprint.plugins.ai_error_detection")
 
 def get_print_image(self):
     """
     Fetch the most recent print image from the Octolapse snapshot directory.
-    Logs messages to OctoPrint's log file.
+    Only JPEG files with "thumb" in the filename are considered.
+    Returns a tuple (image, image_path) or None if no valid image is found.
     """
-    # octolapse_path = "C:/Users/daria/.octoprint/data/octolapse/tmp/octolapse_snapshots_tmp/"
+    # The Octolapse snapshot directory
     octolapse_path = "/home/AI2SB/.octoprint/data/octolapse/tmp/octolapse_snapshots_tmp/"
     
     try:
@@ -24,13 +26,17 @@ def get_print_image(self):
         logger.info(f"Fetching print images... Files in octolapse directory: {files}")
 
         if not files:
-            logger.warning("No image files found in the octolapse directory.")
+            logger.warning("No image files found in the octolapse directory. Did you enable Octolapse?")
             return None
 
-        # Filter only image files (jpg, jpeg, png)
-        image_files = [f for f in files if f.lower().endswith((".jpg", ".jpeg", ".png"))]
+        # Filter only .jpeg files that have "thumb" in the filename (case-insensitive)
+
+        # Thumb is for code sustainability purposes. Like this it allows the user
+        # to integrate multiple cameras, as the "main" image in this directory is only being "rewritten"
+        # under xxxThumbxxx.jpeg.
+        image_files = [f for f in files if f.lower().endswith(".jpeg") and "thumb" in f.lower()]
         if not image_files:
-            logger.warning("No image files (jpg/png) found in the octolapse directory.")
+            logger.warning("No matching 'thumb' .jpeg files found in the octolapse directory.")
             return None
 
         # Sort files by modification time (latest first)
@@ -46,15 +52,7 @@ def get_print_image(self):
             logger.error("Failed to read image with OpenCV.")
             return None
 
-        return image
+        return image, latest_image_path
     except Exception as e:
         logger.exception(f"Error in get_print_image: {e}")
         return None
-
-# # Test
-# if __name__ == "__main__":
-#     image = get_print_image(None)
-#     if image is not None:
-#         logger.info("Image captured successfully.")
-#     else:
-#         logger.error("No image captured.")
