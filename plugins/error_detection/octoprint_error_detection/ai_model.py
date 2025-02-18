@@ -1,6 +1,5 @@
 import numpy as np
 import cv2
-from PIL import Image
 import tflite_runtime.interpreter as tflite
 
 class ai_model:
@@ -17,37 +16,43 @@ class ai_model:
             print(f"Failed to initialize TFLite model: {e}")
             self.interpreter = None
 
-    def preprocess_image(self, image_path):
+    def preprocess_image(self, image_input):
         """
-        Loads and preprocesses the image for inference.
+        Preprocesses the image for inference.
+        Accepts either a file path (str) or an image array (numpy.ndarray).
         Adjust resizing and normalization as needed by your model.
         """
-        # Load image using OpenCV
-        img = cv2.imread(image_path)
-        if img is None:
-            raise ValueError("Image not found or unable to load.")
+        # If a file path is provided, load the image using OpenCV
+        if isinstance(image_input, str):
+            img = cv2.imread(image_input)
+            if img is None:
+                raise ValueError("Image not found or unable to load.")
+        else:
+            # Assume the image is already loaded as a NumPy array
+            img = image_input
+
         # Resize to expected input size (assumed 640x640; adjust if needed)
         input_shape = self.input_details[0]['shape'][1:3]
         img_resized = cv2.resize(img, (input_shape[1], input_shape[0]))
-        # Normalize: convert to float32 and scale [0, 255] -> [0, 1]
+        # Normalize: convert to float32 and scale from [0, 255] to [0, 1]
         img_normalized = img_resized.astype(np.float32) / 255.0
-        # Convert HWC to CHW if necessary (depends on your model)
+        # Convert HWC to CHW if required by your model
         img_transposed = np.transpose(img_normalized, (2, 0, 1))
         # Add a batch dimension
         input_tensor = np.expand_dims(img_transposed, axis=0)
         return input_tensor
 
-    def detect_error(self, image_path):
+    def detect_error(self, image_input):
         """
         Runs inference on the image and checks if any detection has confidence > 30%.
-        Note: You will likely need to adjust postprocessing to match your TFLite model's output.
+        Adjust postprocessing to match your TFLite model's output.
         """
         if not self.interpreter:
             print("Model not initialized.")
             return False
         try:
-            # Preprocess the image
-            input_tensor = self.preprocess_image(image_path)
+            # Preprocess the image (whether file path or array)
+            input_tensor = self.preprocess_image(image_input)
             # Set the input tensor
             self.interpreter.set_tensor(self.input_details[0]['index'], input_tensor)
             # Run inference
@@ -57,7 +62,7 @@ class ai_model:
             
             # Example postprocessing: assume outputs shape is [1, num_detections, 6]
             # where each detection is [x1, y1, x2, y2, confidence, class]
-            detections = outputs  # adjust if your model returns multiple outputs
+            detections = outputs  # Adjust if your model returns multiple outputs
             for detection in detections[0]:
                 confidence = detection[4]
                 if confidence * 100 > 30:
