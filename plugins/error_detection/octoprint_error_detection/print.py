@@ -1,8 +1,8 @@
-# print.py
 import octoprint.plugin
 import threading
 import time
 import logging
+import os  # Needed for checking file modification time
 
 from .ai_model import ai_model
 import octoprint_error_detection.capture_image as capture_image
@@ -18,7 +18,7 @@ class MyPlugin(octoprint.plugin.SimpleApiPlugin,
         self.error_model = ai_model(model_path)  # Initialize the AI error detection model
 
         self._monitoring = False
-        self.last_processed_file = None  # To track the last image file we processed
+        self.last_processed_mtime = 0  # To track the modification time of the last processed image
 
         # Configure logging to display in octoprint.log
         self._logger.setLevel(logging.INFO)
@@ -52,7 +52,7 @@ class MyPlugin(octoprint.plugin.SimpleApiPlugin,
         if event == "PrintStarted":
             self._logger.info("Print started, starting error detection monitoring.")
             self._monitoring = True
-            self.last_processed_file = None  # Reset the last processed image
+            self.last_processed_mtime = 0  # Reset the last processed modification time
             threading.Thread(target=self.monitor_print, daemon=True).start()
         elif event in ("PrintDone", "PrintCancelled", "PrintFailed"):
             self._logger.info("Print ended (%s), stopping error detection monitoring.", event)
@@ -61,9 +61,9 @@ class MyPlugin(octoprint.plugin.SimpleApiPlugin,
     def monitor_print(self):
         """
         Continuously monitor the Octolapse snapshot directory for new images.
-        When a new image (a .jpeg with 'thumb' in the filename) is detected,
-        pass it to the AI model for error detection. If an error is detected,
-        log the message, notify the user, and cancel the print.
+        When a new image (a .jpeg with 'thumb' in the filename) is detected based on its
+        modification time, pass it to the AI model for error detection. If an error is detected,
+        log the message, notify the user, and pause the print.
         """
         while self._monitoring:
             try:
@@ -72,25 +72,24 @@ class MyPlugin(octoprint.plugin.SimpleApiPlugin,
                 result = capture_image.get_print_image(self)
                 if result is not None:
                     image, image_path = result
-                    # Only process if this file is new
-                    if self.last_processed_file != image_path:
-                        self.last_processed_file = image_path
+                    current_mtime = os.path.getmtime(image_path)
+                    # Process the image if it is new (i.e. has a newer modification time)
+                    if current_mtime > self.last_processed_mtime:
+                        self.last_processed_mtime = current_mtime
                         self._logger.info("New image detected: %s. Processing...", image_path)
                         if self.error_model.detect_error(image):
                             self._logger.warning("Error detected in the print process! Pausing printing.")
                             self.notify_user("Error detected in the print process! Pausing printing.")
-                            # self._printer.cancel_print()
-                            # it stops the printing instead of canceling it, more sustainable
                             self._printer.pause_print()
                             self._monitoring = False
                             break
                         else:
-                            self._logger.info("No error detected for now, continue monitoring.")
+                            self._logger.info("No error detected, continue monitoring.")
                 else:
                     self._logger.debug("No valid image found in Octolapse directory.")
             except Exception as e:
                 self._logger.error("Error during monitoring: %s", e)
-            # the plugin checks every 10 seconds if there is a new image    
+            # Check every 10 seconds for a new image
             time.sleep(10)
 
     def notify_user(self, message):
