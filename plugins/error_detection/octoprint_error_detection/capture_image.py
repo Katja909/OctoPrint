@@ -18,7 +18,7 @@ def get_print_image(self):
     try:
         # Check if the directory exists
         if not os.path.exists(octolapse_path):
-            logger.error(f"Directory not found for fetching print images: {octolapse_path}")
+            logger.error(f"Directory not found for fetching print images: {octolapse_path}. Did you enable Octolapse?")
             return None
 
         # List all files in the directory

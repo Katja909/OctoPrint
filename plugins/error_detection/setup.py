@@ -47,7 +47,10 @@ setup(
     url=PLUGIN_URL,  # Plugin URL (optional)
     license=PLUGIN_LICENSE,  # Plugin license
     packages=[PLUGIN_PACKAGE],  # List of packages to include in the distribution
-    include_package_data=True,  # Include additional files specified in MANIFEST.in
+    include_package_data=True,   # Include additional files specified in MANIFEST.in
+    package_data={
+        "octoprint_error_detection": ["model_weights/**/*"],
+    },
     install_requires=PLUGIN_REQUIREMENTS,  # Dependencies to install alongside the plugin
     entry_points={
         # Entry point for OctoPrint to recognize the plugin
