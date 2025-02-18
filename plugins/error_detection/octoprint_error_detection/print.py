@@ -57,6 +57,11 @@ class MyPlugin(octoprint.plugin.SimpleApiPlugin,
             self._monitoring = True
             self.last_processed_mtime = 0  # Reset the last processed modification time
             threading.Thread(target=self.monitor_print, daemon=True).start()
+        elif event == "PrintResumed":
+            self._logger.info("Print resumed, restarting error detection monitoring.")
+            if not self._monitoring:
+                self._monitoring = True
+                threading.Thread(target=self.monitor_print, daemon=True).start()
         elif event in ("PrintDone", "PrintCancelled", "PrintFailed"):
             self._logger.info("Print ended (%s), stopping error detection monitoring.", event)
             self._monitoring = False
