@@ -94,7 +94,7 @@ class ai_model:
             logger.info("AI Model output generated.")
             for detection in detections[0]:
                 confidence = detection[4]
-                logger.info(f"AI Model: Confidence: {confidence * 100:.2f}%")
+                # logger.info(f"AI Model: Confidence: {confidence * 100:.2f}%")
                 if confidence * 100 > 5:
                     logger.info(f"AI Model: Detected error with confidence: {confidence * 100:.2f}%")
                     return True
